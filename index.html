@@ -3,136 +3,859 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LiME: Lightweight Mixture of Experts</title>
+    <title>LiME — Lightweight Mixture of Experts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800;900&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --lime: #7ed957;
+            --lime-bright: #a3e635;
+            --lime-dark: #4ade80;
+            --lime-glow: rgba(126, 217, 87, 0.4);
+            --lime-subtle: rgba(126, 217, 87, 0.08);
+            --bg-deep: #0a0a0a;
+            --bg-card: #111111;
+            --bg-card-hover: #161616;
+            --bg-code: #0d1117;
+            --text-primary: #f0f0f0;
+            --text-secondary: #8a8a8a;
+            --text-muted: #555;
+            --border: rgba(126, 217, 87, 0.12);
+            --border-strong: rgba(126, 217, 87, 0.25);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .container {
-            text-align: center;
-            padding: 60px 40px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
-            max-width: 900px;
-            margin: 20px;
-        }
-
-        .icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            color: #2d3748;
-            margin-bottom: 10px;
-            line-height: 1.3;
-        }
-
-        .highlight {
-            color: #667eea;
-            font-weight: 700;
-        }
-
-        h2 {
-            font-size: 1.3rem;
-            color: #4a5568;
-            font-weight: 400;
-            margin-bottom: 30px;
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            overflow-x: hidden;
             line-height: 1.6;
         }
 
-        .links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-top: 30px;
+        /* ===== GRAIN OVERLAY ===== */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
         }
 
-        .links a {
+        /* ===== ANIMATED BACKGROUND ===== */
+        .bg-glow {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .bg-glow .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+        .bg-glow .orb:nth-child(1) {
+            width: 600px; height: 600px;
+            background: var(--lime);
+            top: -200px; left: -100px;
+            animation-delay: 0s;
+        }
+        .bg-glow .orb:nth-child(2) {
+            width: 400px; height: 400px;
+            background: #22c55e;
+            bottom: -100px; right: -100px;
+            animation-delay: -7s;
+        }
+        .bg-glow .orb:nth-child(3) {
+            width: 300px; height: 300px;
+            background: #84cc16;
+            top: 50%; left: 50%;
+            animation-delay: -14s;
+            opacity: 0.08;
+        }
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, -30px) scale(1.1); }
+            66% { transform: translate(-30px, 50px) scale(0.9); }
+        }
+
+        /* ===== NAV ===== */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        nav .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+        nav .brand {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--lime);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        nav .brand img { height: 28px; filter: drop-shadow(0 0 6px var(--lime-glow)); }
+        nav .nav-links { display: flex; gap: 2rem; }
+        nav .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            transition: color 0.2s;
+        }
+        nav .nav-links a:hover { color: var(--lime); }
+
+        /* ===== HERO ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 120px 2rem 80px;
+        }
+        .hero .lime-logo {
+            width: 180px;
+            height: auto;
+            margin-bottom: 2rem;
+            filter: drop-shadow(0 0 40px var(--lime-glow));
+            animation: logoFloat 6s ease-in-out infinite;
+        }
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+        }
+        .hero .venue-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: var(--lime-subtle);
+            border: 1px solid var(--border-strong);
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--lime);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+            max-width: 900px;
+            margin-bottom: 1rem;
+        }
+        .hero h1 .lime-text {
+            background: linear-gradient(135deg, var(--lime-bright), var(--lime-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero .subtitle {
+            font-family: 'Source Serif 4', serif;
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-style: italic;
+        }
+        .hero .cta-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 24px;
-            background: #2d3748;
-            color: white;
+            padding: 12px 28px;
+            border-radius: 10px;
             text-decoration: none;
-            border-radius: 10px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .links a:hover {
-            background: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .links img {
-            width: 20px;
-            height: 20px;
-        }
-
-        .coming-soon {
-            margin-top: 40px;
-            padding: 20px;
-            background: #f7fafc;
-            border-radius: 10px;
-            color: #718096;
-        }
-
-        footer {
-            margin-top: 40px;
-            color: #a0aec0;
+            font-weight: 600;
             font-size: 0.9rem;
+            letter-spacing: 0.01em;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--lime), #4ade80);
+            color: #0a0a0a;
+            box-shadow: 0 4px 20px var(--lime-glow);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--lime-glow);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-strong);
+        }
+        .btn-outline:hover {
+            background: var(--lime-subtle);
+            border-color: var(--lime);
+            color: var(--lime);
+        }
+        .btn svg { width: 18px; height: 18px; }
+
+        /* ===== STATS BAR ===== */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            padding: 2rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+        .stat { text-align: center; }
+        .stat .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--lime);
+            letter-spacing: -0.02em;
+        }
+        .stat .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 2px;
+        }
+
+        /* ===== SECTIONS ===== */
+        section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 100px 2rem;
+        }
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--lime);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1rem;
+        }
+        .section-label::before {
+            content: '';
+            width: 24px;
+            height: 2px;
+            background: var(--lime);
+            border-radius: 2px;
+        }
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            line-height: 1.15;
+        }
+        .section-desc {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin-bottom: 3rem;
+            line-height: 1.7;
+        }
+
+        /* ===== METHOD FIGURE ===== */
+        .method-figure {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: #fff;
+            padding: 16px;
+            margin-bottom: 1rem;
+        }
+        .method-figure img {
+            width: 100%;
+            border-radius: 8px;
+        }
+        .method-caption {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 0.5rem;
+            margin-bottom: 3rem;
+            font-family: 'Source Serif 4', serif;
+            font-style: italic;
+        }
+
+        /* ===== FEATURE GRID ===== */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--lime), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .feature-card:hover {
+            border-color: var(--border-strong);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon { font-size: 1.8rem; margin-bottom: 1rem; }
+        .feature-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .feature-card p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ===== RESULT IMAGES ===== */
+        .result-img-wrap {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            background: #fff;
+            margin-bottom: 2rem;
+        }
+        .result-img-wrap img { width: 100%; display: block; }
+        .result-img-wrap .img-caption {
+            padding: 12px 20px;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* ===== CODE BLOCKS ===== */
+        .code-block {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: rgba(126, 217, 87, 0.05);
+            border-bottom: 1px solid var(--border);
+        }
+        .code-header .code-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--lime);
+        }
+        .code-header .code-lang {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .code-block pre {
+            padding: 20px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.7;
+            color: #c9d1d9;
+        }
+        .cm { color: #6a737d; }
+        .kw { color: #ff7b72; }
+        .st { color: #a5d6ff; }
+        .fn { color: #d2a8ff; }
+        .hl { color: var(--lime-bright); font-weight: 600; }
+        .nu { color: #79c0ff; }
+
+        /* ===== STEPS ===== */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            transition: all 0.3s;
+        }
+        .step:hover { border-color: var(--border-strong); }
+        .step-num {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--lime-subtle);
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            font-weight: 800;
+            color: var(--lime);
+        }
+        .step-content h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .step-content p { font-size: 0.88rem; color: var(--text-secondary); }
+
+        /* ===== CITATION ===== */
+        .citation-block {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.7;
+            color: #c9d1d9;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 12px; right: 12px;
+            padding: 6px 14px;
+            background: var(--lime-subtle);
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            color: var(--lime);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: var(--lime); color: var(--bg-deep); }
+
+        /* ===== DIVIDER ===== */
+        .divider { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+        .divider hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+        }
+
+        /* ===== FOOTER ===== */
+        footer.site-footer {
+            text-align: center;
+            padding: 60px 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        footer.site-footer a { color: var(--lime); text-decoration: none; }
+
+        /* ===== SCROLL ANIMATIONS ===== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            nav .nav-links { display: none; }
+            .stats-bar { gap: 1.5rem; }
+            .stat .stat-value { font-size: 1.5rem; }
+            section { padding: 60px 1.2rem; }
+            .step { flex-direction: column; gap: 1rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="icon">🍋</div>
-        
-        <h1>
-            <span class="highlight">LiME</span>: Lightweight Mixture of Experts for Efficient Multimodal Multi-task Learning
-        </h1>
-        
-        <h2>
-            Expert specialization through lightweight modulation with zero-parameter routing
-        </h2>
 
-        <div class="links">
-            <a href="#">
-                📄 Paper
-            </a>
-            <a href="#">
-                💻 Code
-            </a>
-            <a href="#">
-                🤗 Models
-            </a>
+<div class="bg-glow">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-inner">
+        <a href="#" class="brand">
+            <img src="assets/lime.png" alt="LiME">
+            LiME
+        </a>
+        <div class="nav-links">
+            <a href="#method">Method</a>
+            <a href="#results">Results</a>
+            <a href="#quickstart">Quick Start</a>
+            <a href="#dataset">Dataset</a>
+            <a href="#citation">Citation</a>
         </div>
-
-        <div class="coming-soon">
-            <p>🚧 Full project page coming soon...</p>
-        </div>
-
-        <footer>
-            <p>© 2026 LiME Authors</p>
-        </footer>
     </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <img src="assets/lime.png" alt="LiME" class="lime-logo fade-in">
+    <div class="venue-badge fade-in">ICML 2026</div>
+    <h1 class="fade-in">
+        <span class="lime-text">LiME</span>: Lightweight Mixture<br>of Experts
+    </h1>
+    <p class="subtitle fade-in">
+        Expert specialization through lightweight modulation vectors and zero-parameter routing for efficient multimodal multi-task learning
+    </p>
+    <div class="cta-row fade-in">
+        <a href="#" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Paper
+        </a>
+        <a href="#" class="btn btn-outline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+            Code
+        </a>
+        <a href="https://huggingface.co/datasets/Kowsher/MMT-47" class="btn btn-outline" target="_blank">
+            🤗 Dataset
+        </a>
+    </div>
+
+    <div class="stats-bar fade-in">
+        <div class="stat">
+            <div class="stat-value">0.02–0.57M</div>
+            <div class="stat-label">Trainable Params</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">4×</div>
+            <div class="stat-label">Fewer Parameters</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">4.52</div>
+            <div class="stat-label">Samples/s</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">47</div>
+            <div class="stat-label">Tasks</div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- METHOD -->
+<section id="method">
+    <div class="section-label fade-in">Method</div>
+    <h2 class="section-title fade-in">How LiME Works</h2>
+    <p class="section-desc fade-in">
+        LiME replaces heavy per-expert parameters with lightweight modulation vectors and a zero-parameter router — enabling efficient expert specialization at a fraction of the cost.
+    </p>
+
+    <div class="method-figure fade-in">
+        <img src="assets/method.png" alt="LiME Architecture">
+    </div>
+    <p class="method-caption fade-in">
+        <strong>Figure 1.</strong> LiME architecture — (a) Standard MoE-LoRA, (b) LiME shared adapter + modulation, (c) AutoTop-K routing, (d) Load balancing losses.
+    </p>
+
+    <div class="feature-grid">
+        <div class="feature-card fade-in">
+            <div class="feature-icon">🧬</div>
+            <h3>Shared Adapter + Modulation</h3>
+            <p>A single shared LoRA adapter modulated by lightweight per-expert vectors — dramatically reducing parameters while preserving specialization.</p>
+        </div>
+        <div class="feature-card fade-in">
+            <div class="feature-icon">⚡</div>
+            <h3>Zero-Parameter Routing</h3>
+            <p>Expert routing via n-gram hidden-state similarity — no learned gating weights, no auxiliary parameters, no routing collapse.</p>
+        </div>
+        <div class="feature-card fade-in">
+            <div class="feature-icon">🎯</div>
+            <h3>AutoTop-K Selection</h3>
+            <p>Dynamically adjusts expert activation per token based on confidence thresholds, enabling adaptive computation.</p>
+        </div>
+        <div class="feature-card fade-in">
+            <div class="feature-icon">⚖️</div>
+            <h3>Load Balancing</h3>
+            <p>Importance loss + KL-uniform loss ensures experts are utilized evenly, preventing dominant-expert collapse.</p>
+        </div>
+    </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- RESULTS -->
+<section id="results">
+    <div class="section-label fade-in">Results</div>
+    <h2 class="section-title fade-in">State-of-the-Art Efficiency</h2>
+    <p class="section-desc fade-in">
+        LiME matches or outperforms existing MoE-PEFT methods with up to 4× fewer trainable parameters and higher throughput.
+    </p>
+
+    <div class="result-img-wrap fade-in">
+        <img src="assets/result.png" alt="Results Table">
+        <div class="img-caption">
+            <strong>Table 2.</strong> Average results across benchmark categories. LiME variants (highlighted) achieve top performance with significantly fewer parameters.
+        </div>
+    </div>
+
+    <div class="result-img-wrap fade-in">
+        <img src="assets/efi.png" alt="Efficiency Comparison">
+        <div class="img-caption">
+            <strong>Figure 2.</strong> Efficiency comparison — LiME achieves higher throughput, lower memory, and fewer trainable parameters across all variants.
+        </div>
+    </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- QUICK START -->
+<section id="quickstart">
+    <div class="section-label fade-in">Quick Start</div>
+    <h2 class="section-title fade-in">Get Started in Minutes</h2>
+    <p class="section-desc fade-in">
+        Apply LiME to any pretrained model with just a few lines of code. Compatible with LLaVA-OneVision, Qwen2-VL, and more.
+    </p>
+
+    <div class="steps fade-in">
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <h3>Install Dependencies</h3>
+                <p>Clone the repository and install required packages.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <h3>Apply LiME to Your Model</h3>
+                <p>Wrap any model with LiME using a single function call.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <h3>Train with LiMETrainer</h3>
+                <p>Use our custom trainer with specialized learning rates for MoE and PEFT components.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="code-block fade-in">
+        <div class="code-header">
+            <span class="code-title">apply_lime.py</span>
+            <span class="code-lang">Python</span>
+        </div>
+        <pre><span class="kw">from</span> LiMELoRA <span class="kw">import</span> <span class="fn">apply_peft</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> LlavaOnevisionForConditionalGeneration
+
+<span class="cm"># Load your base model</span>
+model = LlavaOnevisionForConditionalGeneration.from_pretrained(
+    <span class="st">"llava-onevision-qwen2-7b-ov-hf"</span>,
+    torch_dtype=torch.bfloat16,
+    device_map=<span class="st">"auto"</span>,
+)
+
+<span class="cm"># ⭐ Apply LiME — one line is all you need</span>
+model = <span class="fn">apply_peft</span>(
+    model,
+    targets=<span class="hl">["q_proj", "k_proj", "v_proj", "o_proj", "out_proj"]</span>,
+    num_experts=<span class="nu">4</span>,
+    rank=<span class="nu">2</span>,
+    use_shared_LiME=<span class="nu">True</span>,
+    n_gram=<span class="nu">1</span>,
+    top_k=<span class="nu">1</span>,
+    rep_mode=<span class="st">"token"</span>,
+    jitter_noise=<span class="nu">0.1</span>,
+    tokenizer=processor.tokenizer,
+    temperature=<span class="nu">0.5</span>,
+    gamma_routing=<span class="nu">0.7</span>,
+    auto_topk=<span class="nu">True</span>,
+    auto_topk_threshold=<span class="nu">0.5</span>,
+)</pre>
+    </div>
+
+    <div class="code-block fade-in">
+        <div class="code-header">
+            <span class="code-title">train.py</span>
+            <span class="code-lang">Python</span>
+        </div>
+        <pre><span class="kw">from</span> trainer <span class="kw">import</span> <span class="fn">LiMEArguments</span>, <span class="fn">LiMETrainer</span>
+
+training_args = <span class="fn">LiMEArguments</span>(
+    output_dir=<span class="st">"./llava-lime-finetuned"</span>,
+    per_device_train_batch_size=<span class="nu">5</span>,
+    gradient_accumulation_steps=<span class="nu">4</span>,
+    num_train_epochs=<span class="nu">4</span>,
+    bf16=<span class="nu">True</span>,
+    learning_rate=<span class="nu">2e-4</span>,
+    <span class="hl">moe_lr</span>=<span class="nu">1e-3</span>,          <span class="cm"># Dedicated LR for routing components</span>
+    <span class="hl">peft_lr</span>=<span class="nu">4e-4</span>,         <span class="cm"># Dedicated LR for LoRA A/B</span>
+    <span class="hl">importance_coef</span>=<span class="nu">0.1</span>,
+    <span class="hl">kl_coef</span>=<span class="nu">0.01</span>,
+    balance_every_n_steps=<span class="nu">50</span>,
+)
+
+trainer = <span class="fn">LiMETrainer</span>(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+    tokenizer=processor.tokenizer,
+    data_collator=collator,
+)
+
+trainer.<span class="fn">train</span>()</pre>
+    </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- DATASET -->
+<section id="dataset">
+    <div class="section-label fade-in">Dataset</div>
+    <h2 class="section-title fade-in">MMT-47 Benchmark</h2>
+    <p class="section-desc fade-in">
+        A comprehensive multimodal multi-task benchmark with 47 tasks spanning vision, language, reasoning, and video understanding.
+    </p>
+
+    <div class="code-block fade-in">
+        <div class="code-header">
+            <span class="code-title">Download Images</span>
+            <span class="code-lang">Bash</span>
+        </div>
+        <pre><span class="cm"># Download the HuggingFace dataset</span>
+pip install datasets
+python -c <span class="st">"from datasets import load_dataset; load_dataset('Kowsher/MMT-47')"</span>
+
+<span class="cm"># Download images</span>
+huggingface-cli download \
+  <span class="hl">Kowsher/MMT-47</span> \
+  --repo-type dataset \
+  --include <span class="st">"images/*"</span> \
+  --local-dir images/
+
+<span class="cm"># Extract images (images.zip is a zip file)</span>
+cd images && unzip images.zip && cd ..</pre>
+    </div>
+
+    <div class="code-block fade-in">
+        <div class="code-header">
+            <span class="code-title">Download Videos (from MVTamperBench)</span>
+            <span class="code-lang">Bash</span>
+        </div>
+        <pre><span class="cm"># Download video data from MVTamperBench</span>
+huggingface-cli download \
+  <span class="hl">Srikant86/MVTamperBench</span> \
+  --repo-type dataset \
+  --include <span class="st">"video/*"</span> \
+  --local-dir videos/
+
+<span class="cm"># Extract all video zip files</span>
+cd videos/
+<span class="kw">for</span> f <span class="kw">in</span> *.zip; <span class="kw">do</span>
+  d=<span class="st">"${f%.zip}"</span>
+  <span class="kw">if</span> [ -d <span class="st">"$d"</span> ]; <span class="kw">then</span>
+    echo <span class="st">"Skipping $f (already extracted)"</span>
+  <span class="kw">else</span>
+    echo <span class="st">"Extracting $f"</span>
+    unzip <span class="st">"$f"</span> -d <span class="st">"$d"</span>
+  <span class="kw">fi</span>
+<span class="kw">done</span>
+cd ..</pre>
+    </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- CITATION -->
+<section id="citation">
+    <div class="section-label fade-in">Citation</div>
+    <h2 class="section-title fade-in">Cite LiME</h2>
+    <p class="section-desc fade-in">If you find LiME useful in your research, please consider citing our paper.</p>
+
+    <div class="citation-block fade-in">
+        <button class="copy-btn" onclick="copyBib()">Copy BibTeX</button>@inproceedings{lime2026,
+  title     = {LiME: Lightweight Mixture of Experts for
+               Efficient Multimodal Multi-task Learning},
+  author    = {[Authors]},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2026}
+}</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+    <p>
+        <span style="color: var(--lime);">🍈</span>
+        LiME — Lightweight Mixture of Experts &nbsp;·&nbsp;
+        <a href="#">Paper</a> &nbsp;·&nbsp;
+        <a href="#">GitHub</a> &nbsp;·&nbsp;
+        <a href="https://huggingface.co/datasets/Kowsher/MMT-47" target="_blank">HuggingFace</a>
+    </p>
+    <p style="margin-top: 8px; color: var(--text-muted);">© 2026 LiME Authors</p>
+</footer>
+
+<script>
+    // Scroll-triggered fade-in
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => entry.target.classList.add('visible'), i * 60);
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Copy BibTeX
+    function copyBib() {
+        const bib = document.querySelector('.citation-block').textContent.replace('Copy BibTeX', '').trim();
+        navigator.clipboard.writeText(bib).then(() => {
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy BibTeX', 2000);
+        });
+    }
+</script>
+
 </body>
 </html>
