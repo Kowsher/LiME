@@ -300,7 +300,7 @@ If you find LiME useful in your research, please cite our paper:
   title     = {LiME: Lightweight Mixture of Experts for
                Efficient Multimodal Multi-task Learning},
   author    = {[Authors]},
-  booktitle = {International Conference on Machine Learning (ICML)},
+  booktitle = {arxiv},
   year      = {2026}
 }
 ```
