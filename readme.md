@@ -49,12 +49,7 @@ LiME variants achieve competitive or superior performance to MoE-PEFT baselines 
 <img src="assets/result.png" alt="Results" width="100%">
 </div>
 
-| Method | #Params | Vision | Image Clf. | Commonsense | GLUE | HLR | Motion & Spatial | Action |
-|:-------|--------:|:------:|:----------:|:-----------:|:----:|:---:|:----------------:|:------:|
-| LoRA | 1.74M | 77.02 | 93.92 | 83.80 | 90.64 | 43.23 | 62.85 | 50.99 |
-| MoELoRA | 10.79M | 77.27 | 93.97 | 84.08 | **91.21** | 43.84 | 63.07 | 51.13 |
-| **LiMELoRA** | **3.49M** | 78.01 | 94.47 | **84.98** | 91.02 | 45.00 | **65.05** | 53.19 |
-| **LiMEDoRA** | **3.84M** | **78.12** | 94.50 | 84.76 | 91.11 | **45.65** | 65.41 | **53.39** |
+
 
 <div align="center">
 <img src="assets/efi.png" alt="Efficiency" width="100%">
