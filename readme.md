@@ -208,7 +208,7 @@ python -c "from datasets import load_dataset; load_dataset('Kowsher/MMT-47')"
 huggingface-cli download \
   Kowsher/MMT-47 \
   --repo-type dataset \
-  --include "images/*" \
+  --include "images.zip/*" \
   --local-dir images/
 
 # Extract images
