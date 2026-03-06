@@ -299,8 +299,7 @@ If you find LiME useful in your research, please cite our paper:
 @inproceedings{lime2026,
   title     = {LiME: Lightweight Mixture of Experts for
                Efficient Multimodal Multi-task Learning},
-  author    = {[Authors]},
-  booktitle = {arxiv},
+  author    = {Md Kowsher, Haris Mansoor, Nusrat Jahan Prottasha, Ozlem Garibay, Victor Zhu, Zhengping Ji, Chen Chen },
   year      = {2026}
 }
 ```
