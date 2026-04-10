@@ -11,7 +11,7 @@
 
 *Expert specialization through lightweight modulation vectors and zero-parameter routing*
 
-[Paper](https://arxiv.org/abs/2510.08513) · [Project Page](https://kowsher.github.io/LiME/) · [Dataset](https://huggingface.co/datasets/Kowsher/MMT-47)
+[Paper](https://arxiv.org/abs/2604.02338) · [Project Page](https://kowsher.github.io/LiME/) · [Dataset](https://huggingface.co/datasets/Kowsher/MMT-47)
 
 </div>
 
