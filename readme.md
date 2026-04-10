@@ -4,7 +4,7 @@
 
 # LiME: Lightweight Mixture of Experts for Efficient Multimodal Multi-task Learning
 
-[![Paper](https://img.shields.io/badge/arXiv-2510.08513-b31b1b.svg)](https://arxiv.org/abs/2510.08513)
+[![Paper](https://img.shields.io/badge/arXiv-2510.08513-b31b1b.svg)](https://arxiv.org/abs/2604.02338)
 [![Dataset](https://img.shields.io/badge/🤗%20Dataset-MMT--47-yellow)](https://huggingface.co/datasets/Kowsher/MMT-47)
 [![Conference](https://img.shields.io/badge/ICML-2026-4b44ce.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
